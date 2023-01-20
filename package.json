@@ -1,6 +1,9 @@
 {
   "name": "functional-types",
   "version": "1.0.0",
+  "scripts": {
+    "build": "./node_modules/typescript/bin/tsc"
+  },
   "dependencies": {
     "@types/node": "^18.11.18",
     "typescript": "^4.9.4"
