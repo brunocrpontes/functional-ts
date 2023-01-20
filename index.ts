@@ -76,7 +76,7 @@ function reduce<T, B>(items: T[], transform: (current: B, value: T) => B, initia
 
 const sum = (a: number, b: number) => a + b;
 const double = (value: number) => value * 2;
-const isOdd = (value: number) => value % 2 === 0;
+const isOdd = (value: number) => value % 2 !== 0;
 const isGreaterThanZero = (value: number) => value > 0
 const isGreatherThanFifty = (value: number) => value > 50
 
