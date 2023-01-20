@@ -10,11 +10,12 @@ function chunk<T>(items: T[], chunkSize: number, initial: T[][] = []): T[][] {
 
     return chunk(tail, chunkSize, initial.concat([head]))
 }
-function map<T, B>(items: T[], transform: (value: T) => B, initial: B[] = []): B[] {
+
+function map<T, B>(items: T[], transform: (value: T) => B): B[] {
     return reduce(
         items,
         (current, value) => current.concat(transform(value)),
-        initial
+        []
     )
 }
 
@@ -25,6 +26,7 @@ function every<T>(items: T[], predicate: (value: T) => boolean) {
         false
     )
 }
+
 function some<T>(items: T[], predicate: (value: T) => boolean) {
     return reduce(
         items,
@@ -33,11 +35,11 @@ function some<T>(items: T[], predicate: (value: T) => boolean) {
     )
 }
 
-function flat<T>(items: T[][], initial: T[] = []){
+function flat<T>(items: T[][]){
     return reduce(
         items,
         (current, item) => current.concat(item),
-        initial
+        []
     )
 }
 
@@ -48,14 +50,14 @@ function flatMap<T, B>(items: T[][], transform: (value: T) => B): B[] {
     )
 }
 
-function filter<T>(items: T[], predicate: (value: T) => boolean, initial: T[] = []): T[] {
+function filter<T>(items: T[], predicate: (value: T) => boolean): T[] {
     return reduce(
         items,
         (current, value) => {
             if(predicate(value)) return current.concat(value)
             return current;
         },
-        initial
+        []
     )
 }
 
