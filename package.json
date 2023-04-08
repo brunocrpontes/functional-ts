@@ -1,8 +1,10 @@
 {
   "name": "functional-types",
   "version": "1.0.0",
+  "main": "./dist/index.js",
   "scripts": {
-    "build": "./node_modules/typescript/bin/tsc"
+    "build": "tsc -b",
+    "start": "tsc -w"
   },
   "dependencies": {
     "@types/node": "^18.11.18",

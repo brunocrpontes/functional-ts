@@ -1,4 +1,3 @@
-
 function chunk<T>(items: T[], chunkSize: number, initial: T[][] = []): T[][] {
     const slices = items.length / chunkSize
 
@@ -11,8 +10,7 @@ function chunk<T>(items: T[], chunkSize: number, initial: T[][] = []): T[][] {
 
     return chunk(tail, chunkSize, initial.concat([head]))
 }
-
-function map<T, B>(items: T[], transform: (value: T) => B): B[] {
+function map<A, B>(items: A[], transform: (value: A) => B): B[] {
     return reduce(
         items,
         (current, value) => current.concat(transform(value)),
@@ -20,7 +18,7 @@ function map<T, B>(items: T[], transform: (value: T) => B): B[] {
     )
 }
 
-function every<T>(items: T[], predicate: (value: T) => boolean, initial: boolean = false): boolean {
+function every<A>(items: A[], predicate: (value: A) => boolean, initial: boolean = false): boolean {
     if(items.length < 1) return initial;
 
     const [head, ...tail] = items
@@ -82,8 +80,6 @@ function reduce<T, B>(items: T[], transform: (current: B, value: T) => B, initia
     const [head, ...tail] = items;
     const next = transform(initial, head)
 
-    if(items.length === 1) return next
-
     return reduce(
         tail,
         transform,
@@ -98,15 +94,21 @@ const timed = <F extends (...args: any[]) => any>(label: string, fn: F): ReturnT
     return result;
 }
 
+const log = <F extends (...args: any[]) => any>(label: string, fn: F): ReturnType<F> => {
+    const result = fn()
+    console.log(label, result)
+    return result
+}
+
 const sum = (a: number, b: number) => a + b;
 const double = (value: number) => value * 2;
 const isOdd = (value: number) => value % 2 !== 0;
 const isGreaterThanZero = (value: number) => value > 0
 const isGreatherThanFifty = (value: number) => value > 50
 
-const array = Array.from({length: 51}, (_, index) => index + 1);
+const array = Array.from({length: 50}, (_, index) => index + 1);
 
-const groups = timed("Chunk", () => chunk(array, 5))
+const groups = log("Chunk Result: ", () => timed("Chunk", () => chunk(array, 5)))
 const flattedGroups = timed("Flat", () => flat(groups))
 const flattedAndDoubled = timed("FlatMap", () => flatMap(groups, double))
 const doubled = timed("Map", () => map(array, double))

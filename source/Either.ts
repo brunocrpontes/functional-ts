@@ -1,8 +1,6 @@
 import { Monad } from './Monad'
 
 export type Left<L> = Monad<L> & {
-    isRight: false;
-    isLeft: true;
     map: () => Left<L>;
     flatMap: () => Left<L>;
     right: (_: (result: never) => void) =>Left<L>,
@@ -10,8 +8,6 @@ export type Left<L> = Monad<L> & {
 }
 
 export type Right<R> = Monad<R> & {
-    isRight: true;
-    isLeft: false;
     right: (_: (result: R) => void) => Right<R>,
     left: (_: (cause: never) => void) => Right<R>,
 }
@@ -24,8 +20,6 @@ export function Either<L, R>(value: R): Either<L, R> {
 
 export function Left<L>(reason: L): Left<L> {
     return {
-        isLeft: true,
-        isRight: false,
         map: () => Left(reason),
         flatMap: () => Left(reason),
         left: (handle) => {
@@ -38,8 +32,6 @@ export function Left<L>(reason: L): Left<L> {
 
 export function Right<R>(value: R): Right<R> {
     return {
-        isLeft: false,
-        isRight: true,
         map: (f) => Right(f(value)),
         flatMap: (f) => f(value),
         left: () => Right(value),
