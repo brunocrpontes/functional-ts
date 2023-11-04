@@ -1,43 +1,35 @@
 import { Monad } from './Monad'
 
-export type Left<L> = Monad<L> & {
-    map: () => Left<L>;
-    flatMap: () => Left<L>;
-    right: (_: (result: never) => void) =>Left<L>,
-    left: (_: (cause: L) => void) => Left<L>,
+export interface Left<E, D> extends Monad<E> {
+  isLeft: () => boolean,
+  isRight: () => boolean,
+  either: <A, B>(leftHandler: (left: E) => A, rightHandler: (right: D) => B) => A,
 }
 
-export type Right<R> = Monad<R> & {
-    right: (_: (result: R) => void) => Right<R>,
-    left: (_: (cause: never) => void) => Right<R>,
+export interface Right<E, D> extends Monad<D> {
+  isLeft: () => boolean,
+  isRight: () => boolean,
+  either: <A, B>(leftHandler: (left: E) => A, rightHandler: (right: D) => B) => B,
 }
 
-export type Either<L, R> = Right<R> | Left<L>
-
-export function Either<L, R>(value: R): Either<L, R> {
-    return Right(value)
+export function Left<E, D>(value: E): Left<E, D> {
+  return {
+    map: <R>(f: (value: E) => R) => Left(f(value)),
+    flatMap: (f) => f(value),
+    isLeft: () => true,
+    isRight: () => false,
+    either: <A, B>(leftHandler: (left: E) => A, _: (right: D) => B) => leftHandler(value),
+  }
 }
 
-export function Left<L>(reason: L): Left<L> {
-    return {
-        map: () => Left(reason),
-        flatMap: () => Left(reason),
-        left: (handle) => {
-            handle(reason)
-            return Left(reason)
-        },
-        right: () => Left(reason)
-    }
+export function Right<E, D>(value: D): Right<E, D> {
+  return {
+    map: <R>(f: (value: D) => R) => Right(f(value)),
+    flatMap: (f) => f(value),
+    isLeft: () => false,
+    isRight: () => true,
+    either: <A, B>(_: (left: E) => A, rightHandler: (right: D) => B) => rightHandler(value),
+  }
 }
 
-export function Right<R>(value: R): Right<R> {
-    return {
-        map: (f) => Right(f(value)),
-        flatMap: (f) => f(value),
-        left: () => Right(value),
-        right: (handle) => {
-            handle(value)
-            return Right(value)
-        }
-    }
-}
+export type Either<E, D> = Left<E, D> | Right<E, D>;

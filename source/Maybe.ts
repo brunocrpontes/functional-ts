@@ -1,36 +1,21 @@
 import { Monad } from './Monad'
-import { Applicative } from './Applicative'
 
-type None = null | undefined;
-
-function isNone(value: any): value is None {
-    return value === null || value === undefined
+export interface Just<T> extends Monad<T> {
+  map: <R>(func: (value: T) => R) => Just<R>,
+  flatMap: <R>(func: (value: T) => Monad<R>) => Monad<R>,
 }
-
-export type Just<T> = Monad<T> & Applicative<T>
-export type Nothing = Monad<never> & Applicative<never>
+export type Nothing = Monad<never>
 
 export type Maybe<T> = Nothing | Just<T>
-export function Maybe<T>(value: T | None): Maybe<T> {
-    if(isNone(value)) {
-        return Nothing()
-    }
 
-    return Just(value)
-}
-
-export function Nothing(): Nothing {
-    return {
-        map: () => Nothing(),
-        flatMap: () => Nothing(),
-        apply: (applicative) => Nothing()
-    }
+export const Nothing: Nothing = {
+  map: (_) => Nothing,
+  flatMap: (_) => Nothing,
 }
 
 export function Just<T>(value: T): Just<T> {
-    return {
-        map: (func) => Just(func(value)),
-        flatMap: (func) => func(value),
-        apply: (applicative) => applicative.map(f => f(value)),
-    }
+  return {
+    map: <R>(func: (value: T) => R) => Just(func(value)),
+    flatMap: <NT, NR extends Just<NT>>(func: (value: T) => NR): NR => func(value),
+  }
 }

@@ -1,118 +1,109 @@
+import { Either, Left, Right } from './source/Either';
+import { Task } from './source/Task';
+import { compose } from './source/compose'
+import { pipe } from './source/pipe'
+import { getInput, puts } from './source/terminal';
+
 function chunk<T>(items: T[], chunkSize: number, initial: T[][] = []): T[][] {
-    const slices = items.length / chunkSize
+  const slices = items.length / chunkSize
 
-    if (slices === 0) return initial;
+  if (slices === 0) return initial;
 
-    if (slices === 1) return initial.concat([items])
+  if (slices === 1) return initial.concat([items])
 
-    const head = items.slice(0, chunkSize)
-    const tail = items.slice(chunkSize)
+  const head = items.slice(0, chunkSize)
+  const tail = items.slice(chunkSize)
 
-    return chunk(tail, chunkSize, initial.concat([head]))
+  return chunk(tail, chunkSize, initial.concat([head]))
 }
 function map<A, B>(items: A[], transform: (value: A) => B): B[] {
-    return reduce(
-        items,
-        (current, value) => current.concat(transform(value)),
-        [] as B[]
-    )
+  return reduce<A, B[]>(
+    items,
+    (current, value) => current.concat(transform(value)),
+    []
+  )
 }
 
-function every<A>(items: A[], predicate: (value: A) => boolean, initial: boolean = false): boolean {
-    if(items.length < 1) return initial;
+function every<A>(items: A[], predicate: (value: A) => boolean): boolean {
+  // if(items.length < 1) return initial;
+  //
+  // const [head, ...tail] = items
+  // const result = predicate(head);
+  //
+  // if(items.length === 1 || !result) return result;
+  //
+  // return every(
+  //     tail,
+  //     predicate,
+  //     result
+  // )
 
-    const [head, ...tail] = items
-    const result = predicate(head);
-
-    if(items.length === 1 || !result) return result;
-
-    return every(
-        tail,
-        predicate,
-        result
-    )
+  return reduce(
+    items,
+    (previousPredicate, item) => previousPredicate && predicate(item),
+    true
+  )
 }
 
-function some<T>(items: T[], predicate: (value: T) => boolean, initial: boolean = false): boolean {
-    if(items.length < 1) return initial;
+function some<T>(items: T[], predicate: (value: T) => boolean): boolean {
+  // if(items.length < 1) return initial;
+  //
+  // const [head, ...tail] = items
+  // const result = predicate(head);
+  //
+  // if(items.length === 1 || result) return result;
+  //
+  // return some(
+  //     tail,
+  //     predicate,
+  //     result
+  // )
 
-    const [head, ...tail] = items
-    const result = predicate(head);
-
-    if(items.length === 1 || result) return result;
-
-    return some(
-        tail,
-        predicate,
-        result
-    )
+  return reduce(
+    items,
+    (previousPredicate, item) => previousPredicate || predicate(item),
+    false
+  )
 }
 
-function flat<T>(items: T[][]){
-    return reduce(
-        items,
-        (current, item) => current.concat(item),
-        [] as T[]
-    )
+function flat<T>(items: T[][]): T[] {
+  return reduce<T[], T[]>(
+    items,
+    (current, item) => current.concat(item),
+    []
+  )
 }
 
 function flatMap<T, B>(items: T[][], transform: (value: T) => B): B[] {
-    return map(
-        flat(items),
-        transform,
-    )
+  return map(
+    flat(items),
+    transform,
+  )
 }
 
 function filter<T>(items: T[], predicate: (value: T) => boolean): T[] {
-    return reduce(
-        items,
-        (current, value) => {
-            if(predicate(value)) return current.concat(value)
-            return current;
-        },
-        [] as T[]
-    )
+  return reduce(
+    items,
+    (current, value) => {
+      if (predicate(value)) return current.concat(value)
+      return current;
+    },
+    [] as T[]
+  )
 }
 
 function reduce<T, B>(items: T[], transform: (current: B, value: T) => B, initial: B): B {
-    if(items.length < 1) return initial;
+  if (items.length < 1) return initial;
 
-    const [head, ...tail] = items;
-    const next = transform(initial, head)
+  const [head, ...tail] = items;
+  const next = transform(initial, head)
 
-    return reduce(
-        tail,
-        transform,
-        next
-    )
+  return reduce(
+    tail,
+    transform,
+    next
+  )
 }
 
-const timed = <F extends (...args: any[]) => any>(label: string, fn: F): ReturnType<F> => {
-    console.time(label)
-    const result = fn()
-    console.timeEnd(label)
-    return result;
-}
 
-const log = <F extends (...args: any[]) => any>(label: string, fn: F): ReturnType<F> => {
-    const result = fn()
-    console.log(label, result)
-    return result
-}
-
-const sum = (a: number, b: number) => a + b;
-const double = (value: number) => value * 2;
-const isOdd = (value: number) => value % 2 !== 0;
-const isGreaterThanZero = (value: number) => value > 0
-const isGreatherThanFifty = (value: number) => value > 50
-
-const array = Array.from({length: 50}, (_, index) => index + 1);
-
-const groups = log("Chunk Result: ", () => timed("Chunk", () => chunk(array, 5)))
-const flattedGroups = timed("Flat", () => flat(groups))
-const flattedAndDoubled = timed("FlatMap", () => flatMap(groups, double))
-const doubled = timed("Map", () => map(array, double))
-const odd = timed("Filter", () => filter(array, isOdd))
-const isEveryValueIsGreatherThan0 = timed("Every", () => every(array, isGreaterThanZero))
-const hasSomeValueGreatherThan50 = timed("Some", () => some(array, isGreatherThanFifty))
-const summation = timed("Reduce", () => reduce(array, sum, 0))
+getInput("Qual o seu nome?").fork((input => input.map(name => puts(`O meu nome é ${name}`))), console.error)

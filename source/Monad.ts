@@ -1,6 +1,6 @@
-import { Functor } from "./Functor"
+import type { Functor } from "./Functor"
 
 export interface Monad<T> extends Functor<T> {
-    flatMap: <B>(transform: (value: T) => Monad<B>) => Monad<B>
-    map: <B>(transform: (value: T) => B) => Monad<B>
+  map: <R>(f: (value: T) => R) => Monad<R>,
+  flatMap: <R>(f: (value: T) => Monad<R>) => Monad<R>
 }
