@@ -1,3 +1,3 @@
-export interface Functor<T> {
-  map: <R>(f: (value: T) => R) => Functor<R>,
+export interface Functor<A> {
+  map: <B>(f: (value: A) => B) => Functor<B>,
 }

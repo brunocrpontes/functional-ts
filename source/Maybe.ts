@@ -13,9 +13,9 @@ export const Nothing: Nothing = {
   flatMap: (_) => Nothing,
 }
 
-export function Just<T>(value: T): Just<T> {
+export function Just<A>(value: A): Just<A> {
   return {
-    map: <R>(func: (value: T) => R) => Just(func(value)),
-    flatMap: <NT, NR extends Just<NT>>(func: (value: T) => NR): NR => func(value),
+    map: <B>(func: (value: A) => B) => Just(func(value)),
+    flatMap: <B>(f: (value: A) => B): B => f(value),
   }
 }
