@@ -1,6 +1,7 @@
-import type { Functor } from "./Functor"
+import type { Functor } from "./Functor";
 
-export interface Monad<A> extends Functor<A> {
-  map: <B>(f: (value: A) => B) => Monad<B>,
-  flatMap: <B>(f: (value: A) => Monad<B>) => Monad<B>
-}
+export interface Monad<A, K extends Exclude<keyof any, symbol | number>> extends Functor<A, K> {
+  flatMap: <B>(f: (value: A) => B) => B;
+};
+
+export type MonadOf<M> = M extends Monad<infer A, any> ? A : M;

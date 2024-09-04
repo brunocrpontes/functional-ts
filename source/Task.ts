@@ -1,18 +1,27 @@
 import type { Monad } from "./Monad";
 import { compose } from "./compose";
 
-type TaskHandle<E, R> = (fail: (error: E) => void, done: (result: R) => void) => void
+export type TaskResultOf<T> = T extends Task<any, infer R> ? R : T;
+export type TaskErrorOf<T> = T extends Task<infer E, any> ? E : T;
 
-export interface Task<E, R> extends Monad<R> {
-  fork: TaskHandle<E, R>;
-  map: <R2>(f: (value: R) => R2) => Task<E, R2>;
-  flatMap: <R2>(f: (value: R) => Task<E, R2>) => Task<E, R2>
-}
+export type Task<E, R> = Omit<Monad<R, "Task">, "flatMap" | "map"> & { 
+  fork: (fail: (error: E) => void, done: (result: R) => void) => void;
+  map: <R2>(func: (value: R) => R2) => Task<E, R2>
+  flatMap: <E2, R2>(func: (value: R) => Task<E | E2, R2>) => Task<E | E2, R2>;
+};
 
-export const Task = <E, R>(fork: TaskHandle<E, R>): Task<E, R> => ({
+export const Task = <E, R>(
+  fork: (fail: (error: E) => void, done: (result: R) => void) => void,
+): Task<E, R> => ({
+  _tag_: "Task",
   fork,
-  map: (f) => Task((fail, done) => fork(fail, compose(done, f))),
-  flatMap: (f) => Task((fail, done) => fork(fail, (value) => f(value).fork(fail, done)))
-})
+  map: (f) => Task<E, ReturnType<typeof f>>((fail, done) => fork(fail, compose(done, f))),
+  flatMap: <E2, R2>(f: (value: R) => Task<E | E2, R2>) => 
+    Task<E | E2, R2>((fail, done) => fork(
+      fail,
+      (value) => f(value).fork(fail, done)
+      )
+    )
+});
 
-Task.of = <D>(value: D) => Task<D, never>((done) => done(value));
+Task.of = <D>(value: D) => Task<never, D>((_, done) => done(value));
